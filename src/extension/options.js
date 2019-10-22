@@ -12,7 +12,6 @@ let transferToElement = document.getElementById('transferTo');
 
 let saveButton = document.getElementById('saveOptions');
 
-console.log("elements mapped successfully");
 saveButton.addEventListener('click', function () {
   chrome.storage.local.set({
     owner: ownerElement.value,
@@ -26,7 +25,7 @@ saveButton.addEventListener('click', function () {
 function loadSettings() {
   console.log("loading settings");
   chrome.storage.local.get(['owner', 'transferFrom', 'transferTo'], function (result) {
-    console.log("successfully loaded settings: "+ result.owner);
+    console.log("successfully loaded settings: " + result.owner);
     ownerElement.value = result.owner;
     transferFromElement.value = result.transferFrom;
     transferToElement.value = result.transferTo;
