@@ -29,12 +29,23 @@ function ApplyFinalLabel(settings) {
         $("#labels-select-menu > summary").trigger("click");
 
         ExecuteSoon(function () {
-            // $("#labels-select-menu > details-menu > div.hx_rsm-content > div > form > div");
-            console.log("setting label to field: " + $("#label-filter-field"));
-            $("#label-filter-field").value = "area-blazor";
-            SimulateEnter("#label-filter-field");
+            console.log("Applying label");
+            let areaLabelItem = FindAreaLabel(settings);
+            areaLabelItem.trigger("click");
+            $("#labels-select-menu > summary").trigger("click");
+            window.close();
         });
     });
+}
+
+function FindAreaLabel(settings) {
+    let list = $(".js-filterable-issue-labels").children();
+    let labelItem = list.filter(function () {
+        var matchingText = $(this).find("div.select-menu-item-text div span").text().trim().toLowerCase();
+        return matchingText === "area-blazor";
+    });
+
+    return labelItem;
 }
 
 function TransferIssue(settings) {
