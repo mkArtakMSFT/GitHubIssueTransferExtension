@@ -1,25 +1,38 @@
 function InitializeHandler() {
-    var url = window.location.href;
     $(document).ready(function () {
-        if (url.toLowerCase().startsWith("https://github.com/aspnet/blazor/issues/") && url.endsWith("?transfer")) {
-            console.log("Ready to transfer: " + url);
+        OnIssueTransferRequest(function (settings) {
             $("#partial-discussion-sidebar > form > div > details > summary").trigger('click');
             ExecuteSoon(function () {
                 $("#partial-discussion-sidebar > form > div > details > details-dialog > div.Box-body.p-3 > details > summary").trigger("click");
                 ExecuteSoon(function () {
                     let options = $("#transfer-possible-repositories-menu > label[class='select-menu-item'][role='menuitemradio']");
+
+                    console.log("Preparing to transfer the issue to " + settings.transferTo);
+
                     let targetRepoItem = options.filter(function () {
-                        return $(this).text().contains("AspNetCore");
+                        var matchingText = $(this).find("div.select-menu-item-text div span").text().trim().toLowerCase();
+                        console.log(matchingText);
+                        return matchingText === settings.transferTo.toLowerCase();
                     });
-                    console.log("Found target item: " + targetRepoItem);
 
                     targetRepoItem.trigger("click");
                     ExecuteSoon(function () {
-                        $("#transfer-possible-repositories-menu > label:nth-child(3)")
-
+                        console.log("transferring issue to " + settings.transferTo + " repo");
+                        $("#partial-discussion-sidebar > form > div > details > details-dialog  button[type='submit']").trigger("click");
                     });
                 });
             });
+        });
+    });
+}
+
+function OnIssueTransferRequest(callback) {
+    var url = window.location.href;
+    GetSettings(function (settings) {
+
+        if (url.toLowerCase().startsWith(GetIssuesUrl(settings)) && url.endsWith("?transfer")) {
+            console.log("Ready to transfer: " + url);
+            callback(settings);
         }
     });
 }
@@ -41,16 +54,27 @@ function transferAll() {
     }
 }
 
+function GetIssuesUrl(settings) {
+    let result = "https://github.com/" + settings.owner + "/" + settings.transferFrom + "/issues/";
+    return result.toLowerCase();
+}
+
 function GetIssueUrl(issueNumber, callback) {
+    GetSettings(function (settings) {
+        callback(GetIssuesUrl(settings) + issueNumber + "?transfer");
+    });
+}
+
+function GetSettings(callback) {
     chrome.storage.local.get(['owner', 'transferFrom', 'transferTo'], function (result) {
-        callback("https://github.com/" + result.owner + "/" + result.transferFrom + "/issues/" + issueNumber + "?transfer");
+        callback(result);
     });
 }
 
 function ExecuteSoon(callback) {
     setTimeout(function () {
         callback();
-    }, 200);
+    }, 500);
 }
 
 InitializeHandler();
