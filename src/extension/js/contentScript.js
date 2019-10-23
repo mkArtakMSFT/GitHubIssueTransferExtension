@@ -1,38 +1,62 @@
 function InitializeHandler() {
     $(document).ready(function () {
-        OnIssueTransferRequest(function (settings) {
-            $("#partial-discussion-sidebar > form > div > details > summary").trigger('click');
-            ExecuteSoon(function () {
-                $("#partial-discussion-sidebar > form > div > details > details-dialog > div.Box-body.p-3 > details > summary").trigger("click");
-                ExecuteSoon(function () {
-                    let options = $("#transfer-possible-repositories-menu > label[class='select-menu-item'][role='menuitemradio']");
-
-                    console.log("Preparing to transfer the issue to " + settings.transferTo);
-
-                    let targetRepoItem = options.filter(function () {
-                        var matchingText = $(this).find("div.select-menu-item-text div span").text().trim().toLowerCase();
-                        return matchingText === settings.transferTo.toLowerCase();
-                    });
-
-                    targetRepoItem.trigger("click");
-                    ExecuteSoon(function () {
-                        console.log("transferring issue to " + settings.transferTo + " repo");
-                        $("#partial-discussion-sidebar > form > div > details > details-dialog  button[type='submit']").trigger("click");
-                    });
-                });
-            });
+        GetSettings(function (settings) {
+            if (IsIssueTransferRequest(settings)) {
+                TransferIssue(settings);
+            } else if (IsTransferredIssue(settings)) {
+                ApplyFinalLabel(settings);
+            }
         });
     });
 }
 
-function OnIssueTransferRequest(callback) {
+function IsTransferredIssue(settings) {
     var url = window.location.href;
-    GetSettings(function (settings) {
+    if (url.toLowerCase().startsWith(GetIssuesUrl(settings, settings.transferTo))) {
+        return true;
+    }
+}
 
-        if (url.toLowerCase().startsWith(GetIssuesUrl(settings)) && url.endsWith("?transfer")) {
-            console.log("Ready to transfer: " + url);
-            callback(settings);
-        }
+function IsIssueTransferRequest(settings) {
+    var url = window.location.href;
+    if (url.toLowerCase().startsWith(GetIssuesUrl(settings, settings.transferFrom)) && url.endsWith("?transfer")) {
+        return true;
+    }
+}
+
+function ApplyFinalLabel(settings) {
+    ExecuteSoon(function () {
+        $("#labels-select-menu > summary").trigger("click");
+
+        ExecuteSoon(function () {
+            // $("#labels-select-menu > details-menu > div.hx_rsm-content > div > form > div");
+            console.log("setting label to field: " + $("#label-filter-field"));
+            $("#label-filter-field").value = "area-blazor";
+            SimulateEnter("#label-filter-field");
+        });
+    });
+}
+
+function TransferIssue(settings) {
+    $("#partial-discussion-sidebar > form > div > details > summary").trigger('click');
+    ExecuteSoon(function () {
+        $("#partial-discussion-sidebar > form > div > details > details-dialog > div.Box-body.p-3 > details > summary").trigger("click");
+        ExecuteSoon(function () {
+            let options = $("#transfer-possible-repositories-menu > label[class='select-menu-item'][role='menuitemradio']");
+
+            console.log("Preparing to transfer the issue to " + settings.transferTo);
+
+            let targetRepoItem = options.filter(function () {
+                var matchingText = $(this).find("div.select-menu-item-text div span").text().trim().toLowerCase();
+                return matchingText === settings.transferTo.toLowerCase();
+            });
+
+            targetRepoItem.trigger("click");
+            ExecuteSoon(function () {
+                console.log("transferring issue to " + settings.transferTo + " repo");
+                $("#partial-discussion-sidebar > form > div > details > details-dialog  button[type='submit']").trigger("click");
+            });
+        });
     });
 }
 
@@ -51,14 +75,14 @@ function transferAll() {
     }
 }
 
-function GetIssuesUrl(settings) {
-    let result = "https://github.com/" + settings.owner + "/" + settings.transferFrom + "/issues/";
+function GetIssuesUrl(settings, repository) {
+    let result = "https://github.com/" + settings.owner + "/" + repository + "/issues/";
     return result.toLowerCase();
 }
 
 function GetIssueUrl(issueNumber, callback) {
     GetSettings(function (settings) {
-        callback(GetIssuesUrl(settings) + issueNumber + "?transfer");
+        callback(GetIssuesUrl(settings, settings.transferFrom) + issueNumber + "?transfer");
     });
 }
 
@@ -71,7 +95,13 @@ function GetSettings(callback) {
 function ExecuteSoon(callback) {
     setTimeout(function () {
         callback();
-    }, 500);
+    }, 5000);
+}
+
+function SimulateEnter(inputElement) {
+    var e = jQuery.Event("keydown");
+    e.which = 13; // # Some key code value
+    $(inputElement).trigger(e);
 }
 
 InitializeHandler();
