@@ -11,7 +11,6 @@ function InitializeHandler() {
 
                     let targetRepoItem = options.filter(function () {
                         var matchingText = $(this).find("div.select-menu-item-text div span").text().trim().toLowerCase();
-                        console.log(matchingText);
                         return matchingText === settings.transferTo.toLowerCase();
                     });
 
@@ -42,8 +41,6 @@ function transferAll() {
 
     if (url.indexOf("/issues") > 0) {
         let selectedCheckboxes = $("div[aria-label='Issues']>div input:checkbox:checked");
-        console.log('Selected count: ' + selectedCheckboxes.length);
-
         selectedCheckboxes.each(function () {
             let selectedCheckbox = $(this);
             let issueNumber = selectedCheckbox.attr('value');
