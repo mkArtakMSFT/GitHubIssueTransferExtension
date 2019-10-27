@@ -5,7 +5,7 @@
 'use strict';
 
 chrome.runtime.onInstalled.addListener(function () {
-  chrome.storage.local.set({ owner: 'aspnet', transferFrom: 'Blazor', transferTo: 'AspNetCore' }, function () {
+  chrome.storage.local.set({ owner: 'aspnet', transferFrom: 'Blazor', transferTo: 'AspNetCore', labelToApplyAfterMigration: 'area-blazor' }, function () {
     console.log('Stored initial settings');
   });
 

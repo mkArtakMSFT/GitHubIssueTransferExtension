@@ -9,6 +9,7 @@ let page = document.getElementById('buttonDiv');
 let ownerElement = document.getElementById('owner');
 let transferFromElement = document.getElementById('transferFrom');
 let transferToElement = document.getElementById('transferTo');
+let labelToApplyAfterMigrationElement = document.getElementById('labelToApplyAfterMigration');
 
 let saveButton = document.getElementById('saveOptions');
 
@@ -16,19 +17,20 @@ saveButton.addEventListener('click', function () {
   chrome.storage.local.set({
     owner: ownerElement.value,
     transferFrom: transferFromElement.value,
-    transferTo: transferToElement.value
+    transferTo: transferToElement.value,
+    labelToApplyAfterMigration: labelToApplyAfterMigrationElement.value
   }, function () {
-    console.log('successfully stored settings ' + ownerElement.value);
+    console.log('successfully updated settings');
   });
 });
 
 function loadSettings() {
   console.log("loading settings");
-  chrome.storage.local.get(['owner', 'transferFrom', 'transferTo'], function (result) {
-    console.log("successfully loaded settings: " + result.owner);
+  chrome.storage.local.get(['owner', 'transferFrom', 'transferTo', 'labelToApplyAfterMigration'], function (result) {
     ownerElement.value = result.owner;
     transferFromElement.value = result.transferFrom;
     transferToElement.value = result.transferTo;
+    labelToApplyAfterMigrationElement.value = result.labelToApplyAfterMigration
   });
 }
 
